@@ -4,6 +4,7 @@ import '../../../app/data/mock/mock_catalog.dart';
 import '../../../app/data/models/category_model.dart';
 import '../../../app/data/models/product_model.dart';
 import '../../../app/data/services/customer_api_service.dart';
+import 'catalog_response_parser.dart';
 
 class CatalogController extends GetxController {
   CatalogController(this._api);
@@ -60,7 +61,7 @@ class CatalogController extends GetxController {
       final homepageResponse = await _api.homepage();
 
       final homepageCategories =
-          _parseCategories(homepageResponse);
+          CatalogResponseParser.categories(homepageResponse);
 
       if (homepageCategories.isNotEmpty) {
         categories.assignAll(homepageCategories);
@@ -73,7 +74,7 @@ class CatalogController extends GetxController {
     final categoryResponse = await _api.categories();
 
     final categoryList =
-        _parseCategories(categoryResponse);
+        CatalogResponseParser.categories(categoryResponse);
 
     if (categoryList.isNotEmpty) {
       categories.assignAll(categoryList);
@@ -118,7 +119,7 @@ class CatalogController extends GetxController {
       perPage: 100,
     );
 
-    final loadedProducts = _parseProducts(response);
+    final loadedProducts = CatalogResponseParser.products(response);
 
     products.assignAll(loadedProducts);
 
@@ -134,7 +135,7 @@ class CatalogController extends GetxController {
       final categoryResponse = await _api.categories();
 
       final loadedCategories =
-          _parseCategories(categoryResponse);
+          CatalogResponseParser.categories(categoryResponse);
 
       categories.assignAll(
         loadedCategories.isNotEmpty
@@ -154,83 +155,5 @@ class CatalogController extends GetxController {
         products.clear();
       }
     }
-  }
-
-  List<CategoryModel> _parseCategories(
-    Map<String, dynamic> response,
-  ) {
-    final list = _extractList(
-      response,
-      const [
-        'categories',
-        'data',
-        'items',
-      ],
-    );
-
-    return list
-        .whereType<Map>()
-        .map(
-          (item) => CategoryModel.fromJson(
-            Map<String, dynamic>.from(item),
-          ),
-        )
-        .where((item) => item.id > 0)
-        .toList();
-  }
-
-  List<ProductModel> _parseProducts(
-    Map<String, dynamic> response,
-  ) {
-    final list = _extractList(
-      response,
-      const [
-        'products',
-        'data',
-        'items',
-      ],
-    );
-
-    return list
-        .whereType<Map>()
-        .map(
-          (item) => ProductModel.fromJson(
-            Map<String, dynamic>.from(item),
-          ),
-        )
-        .where((item) => item.id > 0)
-        .toList();
-  }
-
-  List<dynamic> _extractList(
-    dynamic source,
-    List<String> keys,
-  ) {
-    if (source is List) {
-      return source;
-    }
-
-    if (source is! Map) {
-      return const [];
-    }
-
-    for (final key in keys) {
-      final value = source[key];
-
-      if (value is List) {
-        return value;
-      }
-
-      if (value is Map) {
-        final nested =
-            _extractList(value, keys);
-
-        if (nested.isNotEmpty) {
-          return nested;
-        }
-      }
-    }
-
-    return const [];
   }
 }
