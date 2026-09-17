@@ -21,6 +21,9 @@ class ProductModel {
     this.isTrending = false,
     this.isTopSelling = false,
     this.isNewArrival = false,
+    this.mainVariantId = 0,
+    this.availableStock,
+    this.source = const {},
   });
 
   final int id;
@@ -44,8 +47,17 @@ class ProductModel {
   final bool isTrending;
   final bool isTopSelling;
   final bool isNewArrival;
+  final int mainVariantId;
+
+  /// Units in stock for the main variant; null when unknown.
+  final double? availableStock;
+
+  /// Raw API payload, kept so the cart can be saved and restored.
+  final Map<String, dynamic> source;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    final variant = _mainVariant(json);
+
     return ProductModel(
       id: _asInt(json['id']),
       name: json['name']?.toString() ?? json['product_name']?.toString() ?? '',
@@ -78,7 +90,29 @@ class ProductModel {
       isTrending: _asBool(json['is_trending']),
       isTopSelling: _asBool(json['is_top_selling']),
       isNewArrival: _asBool(json['is_new_arrival']),
+      mainVariantId: variant == null ? 0 : _asInt(variant['id']),
+      availableStock: variant == null || variant['available_stock'] == null ? null : _asDouble(variant['available_stock']),
+      source: json,
     );
+  }
+
+  /// `main_variant_id`, else the default variant, else the first one.
+  static Map<String, dynamic>? _mainVariant(Map<String, dynamic> json) {
+    final variants = json['variants'];
+    if (variants is! List) return null;
+
+    final list = variants.whereType<Map>().map((item) => Map<String, dynamic>.from(item)).toList();
+    if (list.isEmpty) return null;
+
+    final mainId = _asInt(json['main_variant_id']);
+
+    for (final variant in list) {
+      if (mainId > 0 && _asInt(variant['id']) == mainId) return variant;
+    }
+    for (final variant in list) {
+      if (_asBool(variant['is_default'])) return variant;
+    }
+    return list.first;
   }
 
   static String? _image(Map<String, dynamic> json) {

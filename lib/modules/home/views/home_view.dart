@@ -9,6 +9,7 @@ import 'widgets/hero_banner_section.dart';
 import 'widgets/homepage_section_view.dart';
 import 'widgets/product_section.dart';
 import 'widgets/small_banner_section.dart';
+import '../../../app/localization/t.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -22,7 +23,7 @@ class HomeView extends GetView<HomeController> {
           controller.sections.isEmpty &&
           controller.banners.isEmpty;
       if (controller.isLoading.value && isEmpty) {
-        return const LoadingView(message: 'Preparing storefront...');
+        return LoadingView(message: t('catalog.preparing_store'));
       }
 
       final otherSections = controller.sections
@@ -49,21 +50,21 @@ class HomeView extends GetView<HomeController> {
       if (otherSections.isEmpty) {
         content.addAll([
           ProductSection(
-            title: 'Animal Medicine',
+            title: t('catalog.animal_medicine'),
             items: controller.featuredProducts,
           ),
           ProductSection(
-            title: 'Top Selling Items',
+            title: t('catalog.top_selling'),
             items: controller.topSellingProducts,
           ),
-          ProductSection(title: 'New Arrivals', items: controller.newArrivals),
+          ProductSection(title: t('catalog.new_arrivals'), items: controller.newArrivals),
         ]);
       }
 
       content.add(const SizedBox(height: 22));
 
       return RefreshIndicator(
-        onRefresh: controller.loadHome,
+        onRefresh: () => controller.loadHome(fresh: true),
         child: ListView(padding: EdgeInsets.zero, children: content),
       );
     });
@@ -77,8 +78,8 @@ class HomeView extends GetView<HomeController> {
           Expanded(
             child: TextField(
               onChanged: (value) => controller.searchText.value = value,
-              decoration: const InputDecoration(
-                hintText: 'Search medicines, seeds, fertilizers...',
+              decoration: InputDecoration(
+                hintText: t('catalog.search_home_hint'),
                 prefixIcon: Icon(Icons.search_rounded),
               ),
             ),

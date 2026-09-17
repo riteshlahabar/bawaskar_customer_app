@@ -1,3 +1,5 @@
+import '../../localization/t.dart';
+
 /// A coupon offer shown on the offers screen and applied at checkout.
 class OfferModel {
   const OfferModel({
@@ -26,8 +28,8 @@ class OfferModel {
 
   /// Short badge text, e.g. "20% OFF" or "FLAT 150 OFF".
   String get badge => isPercent
-      ? '${discountValue.toStringAsFixed(discountValue % 1 == 0 ? 0 : 2)}% OFF'
-      : 'FLAT ${discountValue.toStringAsFixed(0)} OFF';
+      ? t('offers.percent_off', {'n': discountValue.toStringAsFixed(discountValue % 1 == 0 ? 0 : 2)})
+      : t('offers.flat_off', {'n': discountValue.toStringAsFixed(0)});
 
   factory OfferModel.fromJson(Map<String, dynamic> json) {
     return OfferModel(

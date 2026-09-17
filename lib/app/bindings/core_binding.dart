@@ -2,12 +2,18 @@ import 'package:get/get.dart';
 
 import '../core/security/get_session_expiry_handler.dart';
 import '../core/security/session_expiry_handler.dart';
+import '../data/cache/file_json_cache_store.dart';
+import '../data/cache/json_cache_store.dart';
+import '../data/services/address_selection_service.dart';
 import '../data/services/api_client.dart';
 import '../data/services/auth_storage.dart';
 import '../data/services/cart_service.dart';
 import '../data/services/customer_api_service.dart';
 import '../data/services/notification_api_service.dart';
 import '../data/services/wishlist_api_service.dart';
+import '../localization/locale_storage.dart';
+import '../localization/translation_api_service.dart';
+import '../localization/translation_service.dart';
 import '../../modules/notifications/controllers/notifications_controller.dart';
 import '../../modules/wishlist/controllers/wishlist_controller.dart';
 
@@ -19,12 +25,21 @@ import '../../modules/wishlist/controllers/wishlist_controller.dart';
 class CoreBinding extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<JsonCacheStore>(
+      () => FileJsonCacheStore(),
+      fenix: true,
+    );
+
+    // Created after the cache store so a saved cart can be restored.
     if (!Get.isRegistered<CartService>()) {
-      Get.put<CartService>(CartService(), permanent: true);
+      Get.put<CartService>(CartService(Get.find<JsonCacheStore>()), permanent: true);
     }
 
     Get.lazyPut<SessionExpiryHandler>(
-      () => GetSessionExpiryHandler(Get.find<AuthStorage>()),
+      () => GetSessionExpiryHandler(
+        Get.find<AuthStorage>(),
+        Get.find<JsonCacheStore>(),
+      ),
       fenix: true,
     );
 
@@ -40,6 +55,29 @@ class CoreBinding extends Bindings {
       () => CustomerApiService(Get.find<ApiClient>()),
       fenix: true,
     );
+
+    // Chosen delivery address, shared by the cart and checkout.
+    Get.lazyPut<AddressSelectionService>(
+      () => AddressSelectionService(Get.find<CustomerApiService>(), Get.find<AuthStorage>()),
+      fenix: true,
+    );
+
+    // Language: registered permanent so every screen and the ApiClient can
+    // read the active locale without re-creating the map.
+    Get.lazyPut<TranslationApiService>(
+      () => TranslationApiService(Get.find<ApiClient>()),
+      fenix: true,
+    );
+    if (!Get.isRegistered<TranslationService>()) {
+      Get.put<TranslationService>(
+        TranslationService(
+          Get.find<TranslationApiService>(),
+          Get.find<LocaleStorage>(),
+          Get.find<JsonCacheStore>(),
+        ),
+        permanent: true,
+      );
+    }
 
     // The wishlist lives app-wide because the heart icon appears on every
     // product tile, not just on the wishlist screen.

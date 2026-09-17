@@ -37,6 +37,17 @@ class CatalogResponseParser {
         .toList();
   }
 
+  /// Last page number of a paginated products response (1 when unknown).
+  static int lastPage(Map<String, dynamic> response) {
+    dynamic data = response['data'];
+
+    if (data is Map && data['products'] is Map) {
+      data = data['products'];
+    }
+
+    return data is Map ? int.tryParse(data['last_page']?.toString() ?? '') ?? 1 : 1;
+  }
+
   static List<dynamic> _extractList(dynamic source, List<String> keys) {
     if (source is List) {
       return source;

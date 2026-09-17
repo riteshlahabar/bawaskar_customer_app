@@ -8,6 +8,7 @@ import '../../../app/widgets/empty_state.dart';
 import '../../../app/widgets/loading_view.dart';
 import '../../../app/widgets/product_image.dart';
 import '../controllers/wishlist_controller.dart';
+import '../../../app/localization/t.dart';
 
 class WishlistView extends GetView<WishlistController> {
   const WishlistView({super.key});
@@ -15,15 +16,15 @@ class WishlistView extends GetView<WishlistController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Wishlist')),
+      appBar: AppBar(title: Text(t('menu.wishlist'))),
       body: Obx(() {
         if (controller.isLoading.value && controller.items.isEmpty) {
-          return const LoadingView(message: 'Loading your wishlist...');
+          return LoadingView(message: t('wishlist.loading'));
         }
         if (controller.isEmpty) {
-          return const EmptyState(
-            title: 'Nothing saved yet',
-            message: 'Tap the heart on any product to keep it here for later.',
+          return EmptyState(
+            title: t('wishlist.empty_title'),
+            message: t('wishlist.empty_message'),
             icon: Icons.favorite_border,
           );
         }
@@ -71,10 +72,10 @@ class WishlistView extends GetView<WishlistController> {
                             ),
                           ),
                           if (!item.isActive)
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.only(top: 4),
                               child: Text(
-                                'Currently unavailable',
+                                t('wishlist.unavailable'),
                                 style: TextStyle(color: AppColors.danger, fontSize: 11.5),
                               ),
                             ),
@@ -82,7 +83,7 @@ class WishlistView extends GetView<WishlistController> {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Remove',
+                      tooltip: t('common.remove'),
                       icon: const Icon(Icons.delete_outline, color: AppColors.danger),
                       onPressed: () => controller.remove(item.productId),
                     ),

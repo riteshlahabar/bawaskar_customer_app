@@ -7,6 +7,7 @@ import '../../../../app/widgets/product_image.dart';
 import '../../../../app/widgets/section_header.dart';
 import '../../../catalog/controllers/catalog_controller.dart';
 import '../../../main_shell/controllers/main_shell_controller.dart';
+import '../../../../app/localization/t.dart';
 
 /// "Shop By Category" horizontal row shown on the home screen.
 class CategoryRow extends StatelessWidget {
@@ -22,8 +23,8 @@ class CategoryRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
-          title: 'Shop By Category',
-          actionText: 'View All',
+          title: t('catalog.shop_by_category'),
+          actionText: t('common.view_all'),
           onAction: () => _openCategory(0),
         ),
         SizedBox(

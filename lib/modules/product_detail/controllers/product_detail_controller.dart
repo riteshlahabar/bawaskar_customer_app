@@ -4,6 +4,7 @@ import '../../../app/data/models/product_model.dart';
 import '../../../app/data/services/cart_service.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/utils/auth_guard.dart';
+import '../../../app/localization/t.dart';
 
 class ProductDetailController extends GetxController {
   ProductDetailController(this._cart);
@@ -20,19 +21,19 @@ class ProductDetailController extends GetxController {
 
   void addToCart() {
     final allowed = AuthGuard.ensureLoggedIn(
-      message: 'Please login or sign up before adding products to cart.',
+      message: t('login.before_cart_add'),
     );
     if (!allowed) return;
 
     for (var i = 0; i < quantity.value; i++) {
       _cart.add(product);
     }
-    Get.snackbar('Added', '${product.name} added to cart', snackPosition: SnackPosition.BOTTOM);
+    Get.snackbar(t('common.added'), t('common.added_to_cart', {'name': product.name}), snackPosition: SnackPosition.BOTTOM);
   }
 
   void buyNow() {
     final allowed = AuthGuard.ensureLoggedIn(
-      message: 'Please login or sign up before buying this product.',
+      message: t('login.before_buy'),
     );
     if (!allowed) return;
 
@@ -45,7 +46,7 @@ class ProductDetailController extends GetxController {
 
   void openCart() {
     final allowed = AuthGuard.ensureLoggedIn(
-      message: 'Please login or sign up before opening cart.',
+      message: t('login.before_open_cart'),
     );
     if (!allowed) return;
     Get.toNamed(AppRoutes.cart);

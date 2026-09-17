@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../controllers/auth_controller.dart';
+import '../../../app/localization/t.dart';
 
 class LoginView extends GetView<AuthController> {
   const LoginView({super.key});
@@ -19,9 +20,9 @@ class LoginView extends GetView<AuthController> {
             const SizedBox(height: 8),
             _brandHeader(),
             const SizedBox(height: 28),
-            const Text('Welcome Back', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+            Text(t('auth.welcome_back'), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),
-            const Text('Login to buy farm medicine, seeds and agriculture essentials.', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            Text(t('auth.customer_login_subtitle'), style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             const SizedBox(height: 24),
             _modeSwitch(),
             const SizedBox(height: 18),
@@ -30,10 +31,10 @@ class LoginView extends GetView<AuthController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('New customer? ', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                Text(t('auth.new_customer'), style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                 TextButton(
                   onPressed: () => Get.toNamed(AppRoutes.signup),
-                  child: const Text('Create account', style: TextStyle(fontWeight: FontWeight.w800)),
+                  child: Text(t('auth.create_account'), style: const TextStyle(fontWeight: FontWeight.w800)),
                 ),
               ],
             ),
@@ -53,13 +54,13 @@ class LoginView extends GetView<AuthController> {
           child: const Icon(Icons.eco_rounded, color: AppColors.primary, size: 30),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Bawaskar Customer', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
               SizedBox(height: 2),
-              Text('Healthy farms, trusted products', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(t('auth.brand_tagline'), style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
             ],
           ),
         ),
@@ -74,8 +75,8 @@ class LoginView extends GetView<AuthController> {
         decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(16)),
         child: Row(
           children: [
-            _modeItem('Mobile OTP', 0),
-            _modeItem('Email Login', 1),
+            _modeItem(t('auth.mobile_otp'), 0),
+            _modeItem(t('auth.email_login'), 1),
           ],
         ),
       );
@@ -111,18 +112,18 @@ class LoginView extends GetView<AuthController> {
         TextField(
           controller: controller.mobileController,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(prefixIcon: Icon(Icons.phone_android_rounded), labelText: 'Mobile Number'),
+          decoration: InputDecoration(prefixIcon: const Icon(Icons.phone_android_rounded), labelText: t('address.mobile')),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: controller.nameController,
           textInputAction: TextInputAction.done,
-          decoration: const InputDecoration(prefixIcon: Icon(Icons.person_outline), labelText: 'Name (optional)'),
+          decoration: InputDecoration(prefixIcon: const Icon(Icons.person_outline), labelText: t('auth.name_optional')),
         ),
         const SizedBox(height: 20),
         Obx(() => ElevatedButton(
               onPressed: controller.isLoading.value ? null : controller.requestOtp,
-              child: Text(controller.isLoading.value ? 'Sending OTP...' : 'Send OTP'),
+              child: Text(controller.isLoading.value ? t('auth.sending_otp') : t('auth.send_otp')),
             )),
       ],
     );
@@ -134,21 +135,21 @@ class LoginView extends GetView<AuthController> {
         TextField(
           controller: controller.emailController,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(prefixIcon: Icon(Icons.email_outlined), labelText: 'Email Address'),
+          decoration: InputDecoration(prefixIcon: const Icon(Icons.email_outlined), labelText: t('auth.email_address')),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: controller.passwordController,
           obscureText: true,
-          decoration: const InputDecoration(prefixIcon: Icon(Icons.lock_outline), labelText: 'Password'),
+          decoration: InputDecoration(prefixIcon: const Icon(Icons.lock_outline), labelText: t('auth.password')),
         ),
         const SizedBox(height: 20),
         Obx(() => ElevatedButton(
               onPressed: controller.isLoading.value ? null : controller.loginWithEmail,
-              child: Text(controller.isLoading.value ? 'Checking...' : 'Login'),
+              child: Text(controller.isLoading.value ? t('auth.checking') : t('common.login')),
             )),
         const SizedBox(height: 10),
-        const Text('Mobile OTP is currently the primary backend login method.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
+        Text(t('auth.otp_primary_note'), textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
       ],
     );
   }

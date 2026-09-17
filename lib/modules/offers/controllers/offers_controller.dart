@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../app/data/models/offer_model.dart';
 import '../../../app/data/services/offer_api_service.dart';
+import '../../../app/localization/t.dart';
 
 /// Lists live offers and applies a coupon code against a cart value.
 ///
@@ -47,7 +48,7 @@ class OffersController extends GetxController {
   Future<bool> apply(double orderValue) async {
     final code = codeInput.text.trim();
     if (code.isEmpty) {
-      Get.snackbar('Coupon', 'Enter a coupon code.');
+      Get.snackbar(t('offers.coupon'), t('offers.enter_code'));
       return false;
     }
 
@@ -57,7 +58,7 @@ class OffersController extends GetxController {
       return true;
     } catch (failure) {
       applied.value = null;
-      Get.snackbar('Coupon', failure.toString());
+      Get.snackbar(t('offers.coupon'), failure.toString());
       return false;
     } finally {
       isApplying.value = false;

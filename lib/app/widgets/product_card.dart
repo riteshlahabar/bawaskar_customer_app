@@ -8,6 +8,7 @@ import '../theme/app_colors.dart';
 import '../utils/auth_guard.dart';
 import 'product_image.dart';
 import 'wishlist_button.dart';
+import '../localization/t.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({super.key, required this.product, this.compact = false});
@@ -103,11 +104,11 @@ class ProductCard extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {
                             final allowed = AuthGuard.ensureLoggedIn(
-                              message: 'Please login or sign up before adding products to cart.',
+                              message: t('login.before_cart_add'),
                             );
                             if (!allowed) return;
                             cart.add(product);
-                            Get.snackbar('Added', '${product.name} added to cart', snackPosition: SnackPosition.BOTTOM);
+                            Get.snackbar(t('common.added'), t('common.added_to_cart', {'name': product.name}), snackPosition: SnackPosition.BOTTOM);
                           },
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.zero,

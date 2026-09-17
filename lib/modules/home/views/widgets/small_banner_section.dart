@@ -7,6 +7,7 @@ import '../../../../app/routes/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/product_image.dart';
 import '../../../main_shell/controllers/main_shell_controller.dart';
+import '../../../../app/localization/t.dart';
 
 /// Row of small promotional / product banner cards used for homepage
 /// sections of type `top_small_banners`.
@@ -71,7 +72,7 @@ class SmallBannerSection extends StatelessWidget {
     final title = product?.name ?? banner?.title ?? '';
     final buttonText = (banner?.buttonText.isNotEmpty ?? false)
         ? banner!.buttonText
-        : 'Shop Now';
+        : t('catalog.shop_now');
 
     void openProduct() {
       if (product != null) {

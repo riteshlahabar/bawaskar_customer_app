@@ -5,6 +5,7 @@ import '../../../../app/routes/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/utils/auth_guard.dart';
 import '../../controllers/product_reviews_controller.dart';
+import '../../../../app/localization/t.dart';
 
 /// Ratings summary, recent reviews and the "write a review" entry point.
 class ProductReviewsSection extends StatelessWidget {
@@ -29,15 +30,15 @@ class ProductReviewsSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text(
-                'Ratings & Reviews',
+              Text(
+                t('reviews.title'),
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
               ),
               const Spacer(),
               TextButton(
                 onPressed: () {
                   final allowed = AuthGuard.ensureLoggedIn(
-                    message: 'Please login to write a review.',
+                    message: t('login.write_review'),
                   );
                   if (!allowed) return;
                   Get.toNamed<void>(
@@ -48,7 +49,7 @@ class ProductReviewsSection extends StatelessWidget {
                     },
                   )?.then((_) => controller.loadFor(productId));
                 },
-                child: const Text('Write a review'),
+                child: Text(t('reviews.write')),
               ),
             ],
           ),
@@ -63,14 +64,14 @@ class ProductReviewsSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  '(${controller.total} reviews)',
+                  t('reviews.count', {'n': '${controller.total}'}),
                   style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                 ),
               ],
             )
           else
-            const Text(
-              'No reviews yet. Be the first to rate this product.',
+            Text(
+              t('reviews.empty'),
               style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
             ),
           const SizedBox(height: 10),
@@ -95,7 +96,7 @@ class ProductReviewsSection extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            review.reviewer.isEmpty ? 'Customer' : review.reviewer,
+                            review.reviewer.isEmpty ? t('common.customer') : review.reviewer,
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,

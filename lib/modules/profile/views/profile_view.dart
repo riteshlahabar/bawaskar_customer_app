@@ -1,77 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
-import '../../../app/routes/app_routes.dart';
-import '../../../app/theme/app_colors.dart';
-import '../../../app/widgets/app_card.dart';
+import '../../../app/utils/profile_fields.dart';
 import '../controllers/profile_controller.dart';
+import 'widgets/profile_detail_section.dart';
+import 'widgets/profile_header_card.dart';
+import '../../../app/localization/t.dart';
 
+/// Account page: the customer's profile details and photo (menus live in the chips).
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        AppCard(
-          child: Row(
-            children: [
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(18)),
-                child: const Icon(Icons.person_rounded, color: Colors.white),
+    return Obx(() {
+      final user = controller.user;
+      final customer = ProfileFields.map(user['customer_profile']);
+      final address = ProfileFields.defaultAddress(user['addresses']);
+      final name = ProfileFields.text(user['name']).isNotEmpty ? ProfileFields.text(user['name']) : controller.name;
+      final mobile = ProfileFields.text(user['mobile']).isNotEmpty ? ProfileFields.text(user['mobile']) : controller.mobile;
+      final email = ProfileFields.realEmail(ProfileFields.text(user['email']).isNotEmpty ? ProfileFields.text(user['email']) : controller.email);
+      final birthDate = DateTime.tryParse(ProfileFields.text(customer['date_of_birth']));
+      final language = ProfileFields.text(customer['preferred_language']);
+
+      return RefreshIndicator(
+        onRefresh: controller.loadProfile,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: [
+            ProfileHeaderCard(
+              photoUrl: controller.photoUrl,
+              title: name,
+              subtitle: mobile.isNotEmpty ? mobile : email,
+              uploading: controller.isUploading.value,
+              onPick: controller.changePhoto,
+            ),
+            if (controller.isLoading.value && user.isEmpty)
+              const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator())),
+            const SizedBox(height: 14),
+            ProfileDetailSection(title: t('account.profile_details'), details: [
+              (icon: Icons.person_outline_rounded, label: t('address.name'), value: name),
+              (icon: Icons.phone_outlined, label: t('auth.mobile'), value: mobile),
+              (icon: Icons.email_outlined, label: t('common.email'), value: email),
+              (icon: Icons.cake_outlined, label: t('profile.dob'), value: birthDate == null ? '' : DateFormat('dd MMM yyyy').format(birthDate)),
+              (icon: Icons.language_rounded, label: t('profile.preferred_language'), value: ProfileFields.languages[language] ?? language),
+            ]),
+            const SizedBox(height: 14),
+            ProfileDetailSection(title: t('address.delivery_address'), details: [
+              (
+                icon: Icons.location_on_outlined,
+                label: address.isEmpty ? 'Address' : ProfileFields.text(address['name']),
+                value: ProfileFields.addressLine(address),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(controller.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
-                    const SizedBox(height: 4),
-                    Text(controller.mobile.isNotEmpty ? controller.mobile : controller.email, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ]),
+          ],
         ),
-        const SizedBox(height: 14),
-        _MenuTile(icon: Icons.favorite_border_rounded, title: 'Wishlist', subtitle: 'Products you saved for later', onTap: () => Get.toNamed(AppRoutes.wishlist)),
-        _MenuTile(icon: Icons.local_offer_outlined, title: 'Offers & Coupons', subtitle: 'Live discounts on your cart', onTap: () => Get.toNamed(AppRoutes.offers)),
-        _MenuTile(icon: Icons.receipt_long_outlined, title: 'Invoices', subtitle: 'Download your billed orders', onTap: () => Get.toNamed(AppRoutes.invoices)),
-        _MenuTile(icon: Icons.assignment_return_outlined, title: 'Returns', subtitle: 'Track your return requests', onTap: () => Get.toNamed(AppRoutes.returns)),
-        _MenuTile(icon: Icons.notifications_none_rounded, title: 'Notifications', subtitle: 'Order updates and offers', onTap: () => Get.toNamed(AppRoutes.notifications)),
-        _MenuTile(icon: Icons.location_on_outlined, title: 'My Addresses', subtitle: 'Add delivery location', onTap: () => Get.toNamed(AppRoutes.addresses)),
-        _MenuTile(icon: Icons.support_agent_rounded, title: 'Support Ticket', subtitle: 'Need help with orders?', onTap: () => Get.toNamed(AppRoutes.support)),
-        _MenuTile(icon: Icons.language_rounded, title: 'Language', subtitle: 'English / Marathi / Hindi', onTap: () {}),
-        _MenuTile(icon: Icons.logout_rounded, title: 'Logout', subtitle: 'Sign out from customer app', onTap: controller.logout, danger: true),
-      ],
-    );
-  }
-}
-
-class _MenuTile extends StatelessWidget {
-  const _MenuTile({required this.icon, required this.title, required this.subtitle, required this.onTap, this.danger = false});
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  final bool danger;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        leading: CircleAvatar(backgroundColor: danger ? AppColors.danger.withValues(alpha: .1) : AppColors.primarySoft, child: Icon(icon, color: danger ? AppColors.danger : AppColors.primary)),
-        title: Text(title, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: danger ? AppColors.danger : AppColors.textPrimary)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
-        trailing: const Icon(Icons.chevron_right_rounded),
-        onTap: onTap,
-      ),
-    );
+      );
+    });
   }
 }

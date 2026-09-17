@@ -37,14 +37,17 @@ class ApiConfig {
   static const String categories = '/catalog/categories';
   static const String products = '/catalog/products';
   static const String homepage = '/catalog/homepage';
-  static const String translations = '/translations';
+  static const String appTranslations = '/app-translations';
+  static const String appTranslationsRegister = '/app-translations/register';
 
   // --- Account --------------------------------------------------------------
   static const String customerDashboard = '/customer/dashboard';
   static const String customerProfile = '/customer/profile';
+  static const String profilePhoto = '/customer/profile/photo';
   static const String customerAddresses = '/customer/addresses';
   static const String customerOrders = '/customer/orders';
   static const String customerSupport = '/customer/support';
+  static const String changePassword = '/customer/change-password';
 
   static String customerOrder(int id) => '/customer/orders/$id';
   static String customerAddress(int id) => '/customer/addresses/$id';
@@ -58,6 +61,7 @@ class ApiConfig {
       '/customer/orders/$orderId/tracking';
   static const String invoices = '/customer/invoices';
   static String invoice(int id) => '/customer/invoices/$id';
+  static String invoicePdf(int id) => '/customer/invoices/$id/pdf';
   static const String returns = '/customer/returns';
   static String returnRequest(int id) => '/customer/returns/$id';
 

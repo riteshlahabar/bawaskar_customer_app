@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:get/get.dart' show FormData, MultipartFile;
+
 import '../../config/api_config.dart';
+import '../models/address_model.dart';
 import 'api_client.dart';
 
 class CustomerApiService {
@@ -40,8 +45,10 @@ class CustomerApiService {
     required String mobile,
     required String email,
     String? password,
+    Map<String, dynamic> location = const {},
   }) {
     return _client.postJson(ApiConfig.signup, {
+      ...location,
       'name': name,
       'mobile': mobile,
       'email': email,
@@ -54,37 +61,49 @@ class CustomerApiService {
       _client.getJson(ApiConfig.customerDashboard);
   Future<Map<String, dynamic>> profile() =>
       _client.getJson(ApiConfig.customerProfile);
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) =>
+      _client.postJson(ApiConfig.customerProfile, data);
+
+  Future<Map<String, dynamic>> uploadProfilePhoto(String filePath) async {
+    final bytes = await File(filePath).readAsBytes();
+    final filename = filePath.split(RegExp(r'[\\/]')).last;
+
+    return _client.postForm(ApiConfig.profilePhoto, FormData({'photo': MultipartFile(bytes, filename: filename)}));
+  }
 
   Future<Map<String, dynamic>> products({
     String audience = 'customer',
     String? search,
     int? categoryId,
     String? categorySlug,
-    int? perPage,
+    int page = 1,
+    int perPage = 20,
+    // true bypasses the server cache — only for pull-to-refresh.
+    bool fresh = false,
   }) {
     return _client.getJson(
       ApiConfig.products,
       query: {
-  'audience': audience,
-  'fresh': 1,
-  if (search != null && search.trim().isNotEmpty)
-    'search': search.trim(),
-  if (categoryId != null && categoryId > 0)
-    'category_id': categoryId,
-  if (categorySlug != null && categorySlug.trim().isNotEmpty)
-    'category': categorySlug.trim(),
-  if (perPage != null && perPage > 0)
-    'per_page': perPage,
-},
+        'audience': audience,
+        if (fresh) 'fresh': 1,
+        'page': page,
+        'per_page': perPage,
+        if (search != null && search.trim().isNotEmpty)
+          'search': search.trim(),
+        if (categoryId != null && categoryId > 0)
+          'category_id': categoryId,
+        if (categorySlug != null && categorySlug.trim().isNotEmpty)
+          'category': categorySlug.trim(),
+      },
     );
   }
 
-  Future<Map<String, dynamic>> categories() =>
+  Future<Map<String, dynamic>> categories({bool fresh = false}) =>
     _client.getJson(
       ApiConfig.categories,
       query: {
         'audience': 'customer',
-        'fresh': 1,
+        if (fresh) 'fresh': 1,
       },
     );
   Future<Map<String, dynamic>> homepage() =>
@@ -148,6 +167,16 @@ class CustomerApiService {
   Future<Map<String, dynamic>> saveAddress(Map<String, dynamic> data) =>
       _client.postJson(ApiConfig.customerAddresses, data);
 
+  /// Saved delivery addresses, default first.
+  Future<List<AddressModel>> addresses() async {
+    final response = await _client.getJson(ApiConfig.customerAddresses);
+    final raw = response['data']?['addresses'];
+
+    if (raw is! List) return const [];
+
+    return raw.whereType<Map>().map((item) => AddressModel.fromJson(Map<String, dynamic>.from(item))).toList();
+  }
+
   Future<Map<String, dynamic>> support({
     required String subject,
     required String message,
@@ -155,6 +184,26 @@ class CustomerApiService {
     return _client.postJson(ApiConfig.customerSupport, {
       'subject': subject,
       'message': message,
+    });
+  }
+
+  /// False for accounts created by mobile OTP that never set a password.
+  Future<bool> hasPassword() async {
+    final response = await _client.getJson(ApiConfig.changePassword);
+    final value = response['data']?['has_password'];
+
+    return value == true || value == 1;
+  }
+
+  Future<Map<String, dynamic>> changePassword({
+    String? currentPassword,
+    required String password,
+    required String confirmation,
+  }) {
+    return _client.postJson(ApiConfig.changePassword, {
+      if (currentPassword != null && currentPassword.isNotEmpty) 'current_password': currentPassword,
+      'password': password,
+      'password_confirmation': confirmation,
     });
   }
 

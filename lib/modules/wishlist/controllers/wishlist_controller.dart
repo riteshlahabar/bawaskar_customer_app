@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../app/data/models/wishlist_item_model.dart';
 import '../../../app/data/services/auth_storage.dart';
 import '../../../app/data/services/wishlist_api_service.dart';
+import '../../../app/localization/t.dart';
 
 /// Owns the saved-products list and nothing else.
 class WishlistController extends GetxController {
@@ -65,7 +66,7 @@ class WishlistController extends GetxController {
       }
     } catch (failure) {
       if (wasSaved) await load();
-      Get.snackbar('Wishlist', failure.toString());
+      Get.snackbar(t('menu.wishlist'), failure.toString());
     }
   }
 

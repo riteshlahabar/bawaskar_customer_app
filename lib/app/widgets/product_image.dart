@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../config/api_config.dart';
@@ -25,13 +26,33 @@ class ProductImage extends StatelessWidget {
     final asset = assetPath?.trim() ?? '';
 
     if (url.isNotEmpty) {
-      return Image.network(
-        url,
-        height: height,
-        width: width,
-        fit: fit,
-        errorBuilder: (_, _, _) {
-          return _assetOrPlaceholder(asset);
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final boxWidth = width ?? constraints.maxWidth;
+          final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+
+          // Decode near display size instead of the full uploaded photo.
+          final decodeWidth = boxWidth.isFinite && boxWidth > 0
+              ? (boxWidth * pixelRatio * 1.5).round().clamp(64, 1200)
+              : null;
+
+          return CachedNetworkImage(
+            imageUrl: url,
+            height: height,
+            width: width,
+            fit: fit,
+            memCacheWidth: decodeWidth,
+            // Saved downscaled on the phone, so later opens skip the download.
+            // 1200 keeps wide hero banners sharp on large phones.
+            maxWidthDiskCache: 1200,
+            fadeInDuration: const Duration(milliseconds: 150),
+            placeholder: (_, _) => Container(
+              height: height,
+              width: width,
+              color: AppColors.primarySoft,
+            ),
+            errorWidget: (_, _, _) => _assetOrPlaceholder(asset),
+          );
         },
       );
     }

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/app_card.dart';
 import '../controllers/write_review_controller.dart';
+import '../../../app/localization/t.dart';
 
 class WriteReviewView extends GetView<WriteReviewController> {
   const WriteReviewView({super.key});
@@ -11,7 +12,7 @@ class WriteReviewView extends GetView<WriteReviewController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Write a Review')),
+      appBar: AppBar(title: Text(t('reviews.write_title'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -24,8 +25,8 @@ class WriteReviewView extends GetView<WriteReviewController> {
                   style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Your rating',
+                Text(
+                  t('reviews.your_rating'),
                   style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5),
                 ),
                 const SizedBox(height: 6),
@@ -49,27 +50,27 @@ class WriteReviewView extends GetView<WriteReviewController> {
                 const SizedBox(height: 14),
                 TextField(
                   controller: controller.titleInput,
-                  decoration: const InputDecoration(labelText: 'Title (optional)'),
+                  decoration: InputDecoration(labelText: t('reviews.title_optional')),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: controller.bodyInput,
                   minLines: 4,
                   maxLines: 7,
-                  decoration: const InputDecoration(
-                    labelText: 'What did you think? (optional)',
+                  decoration: InputDecoration(
+                    labelText: t('reviews.body_optional'),
                   ),
                 ),
                 const SizedBox(height: 20),
                 Obx(() => ElevatedButton(
                       onPressed: controller.isSubmitting.value ? null : controller.submit,
                       child: Text(
-                        controller.isSubmitting.value ? 'Submitting...' : 'Submit Review',
+                        controller.isSubmitting.value ? t('common.submitting') : t('reviews.submit'),
                       ),
                     )),
                 const SizedBox(height: 8),
-                const Text(
-                  'Reviews are published after a quick moderation check.',
+                Text(
+                  t('reviews.moderation'),
                   style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5),
                 ),
               ],

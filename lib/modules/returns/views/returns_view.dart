@@ -6,6 +6,7 @@ import '../../../app/widgets/app_card.dart';
 import '../../../app/widgets/empty_state.dart';
 import '../../../app/widgets/loading_view.dart';
 import '../controllers/returns_controller.dart';
+import '../../../app/localization/t.dart';
 
 class ReturnsView extends GetView<ReturnsController> {
   const ReturnsView({super.key});
@@ -13,15 +14,15 @@ class ReturnsView extends GetView<ReturnsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Returns')),
+      appBar: AppBar(title: Text(t('returns.title'))),
       body: Obx(() {
         if (controller.isLoading.value && controller.requests.isEmpty) {
-          return const LoadingView(message: 'Loading returns...');
+          return LoadingView(message: t('returns.loading'));
         }
         if (controller.isEmpty) {
-          return const EmptyState(
-            title: 'No returns',
-            message: 'Raise a return from any delivered order within 7 days.',
+          return EmptyState(
+            title: t('returns.empty_title'),
+            message: t('returns.empty_message'),
             icon: Icons.assignment_return_outlined,
           );
         }
@@ -53,7 +54,7 @@ class ReturnsView extends GetView<ReturnsController> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Order ${request.orderNo}',
+                      t('returns.order_no', {'order': request.orderNo}),
                       style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                     ),
                     const SizedBox(height: 6),
@@ -65,7 +66,7 @@ class ReturnsView extends GetView<ReturnsController> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Refund ₹${request.refundAmount.toStringAsFixed(2)}',
+                      t('returns.refund', {'amount': '₹${request.refundAmount.toStringAsFixed(2)}'}),
                       style: const TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w800,

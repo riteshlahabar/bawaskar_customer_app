@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../app/data/services/review_api_service.dart';
+import '../../../app/localization/t.dart';
 
 /// Captures a star rating and optional text for one product.
 ///
@@ -34,11 +35,11 @@ class WriteReviewController extends GetxController {
 
   Future<void> submit() async {
     if (productId <= 0) {
-      Get.snackbar('Review', 'No product selected.');
+      Get.snackbar(t('orders.review'), t('reviews.no_product'));
       return;
     }
     if (rating.value < 1) {
-      Get.snackbar('Review', 'Tap a star to rate this product.');
+      Get.snackbar(t('orders.review'), t('reviews.tap_star'));
       return;
     }
 
@@ -52,9 +53,9 @@ class WriteReviewController extends GetxController {
         body: bodyInput.text,
       );
       Get.back<bool>(result: true);
-      Get.snackbar('Review', 'Thanks! Your review will appear once approved.');
+      Get.snackbar(t('orders.review'), t('reviews.thanks'));
     } catch (failure) {
-      Get.snackbar('Review', failure.toString());
+      Get.snackbar(t('orders.review'), failure.toString());
     } finally {
       isSubmitting.value = false;
     }

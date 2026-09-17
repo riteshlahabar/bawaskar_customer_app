@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
+import '../../../app/data/cache/json_cache_store.dart';
 import '../../../app/data/mock/mock_catalog.dart';
 import '../../../app/data/models/category_model.dart';
 import '../../../app/data/models/homepage_model.dart';
@@ -7,9 +10,13 @@ import '../../../app/data/models/product_model.dart';
 import '../../../app/data/services/customer_api_service.dart';
 
 class HomeController extends GetxController {
-  HomeController(this._api);
+  HomeController(this._api, this._cache);
+
+  /// Shared with the catalog tab, which reads its categories from it.
+  static const homepageCacheKey = 'customer_homepage';
 
   final CustomerApiService _api;
+  final JsonCacheStore _cache;
   final isLoading = false.obs;
   final categories = <CategoryModel>[].obs;
   final products = <ProductModel>[].obs;
@@ -38,24 +45,30 @@ class HomeController extends GetxController {
     loadHome();
   }
 
-  Future<void> loadHome() async {
+  /// Shows the last saved homepage instantly, then refreshes it from the
+  /// server. [fresh] (pull-to-refresh) skips the saved copy and server cache.
+  Future<void> loadHome({bool fresh = false}) async {
+    if (isLoading.value) return;
+
     isLoading.value = true;
     try {
+      if (!fresh && sections.isEmpty && products.isEmpty) {
+        final cached = await _cache.read(homepageCacheKey);
+        if (cached != null) _applyHomepage(cached);
+      }
+
       final homepageResponse = await _api.homepage();
-      final payload = _payload(homepageResponse);
-
-      banners.assignAll(_parseHomepageItems(payload['banners']));
-      categories.assignAll(_parseCategories(payload['categories']));
-      sections.assignAll(_parseSections(payload['rows']));
-
-      final homepageProducts = sections.expand((section) => section.products).toList();
-      products.assignAll(_uniqueProducts(homepageProducts));
+      _applyHomepage(homepageResponse);
+      unawaited(_cache.write(homepageCacheKey, homepageResponse));
 
       if (categories.isEmpty || products.isEmpty) {
-        await _loadCatalogFallback(keepHomepageRows: true);
+        await _loadCatalogFallback(keepHomepageRows: true, fresh: fresh);
       }
     } catch (_) {
-      await _loadCatalogFallback(keepHomepageRows: false);
+      // A saved homepage stays on screen when the network fails.
+      if (sections.isEmpty && products.isEmpty) {
+        await _loadCatalogFallback(keepHomepageRows: false, fresh: fresh);
+      }
     } finally {
       if (categories.isEmpty) categories.assignAll(MockCatalog.categories);
       if (products.isEmpty) products.assignAll(MockCatalog.products);
@@ -63,10 +76,21 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> _loadCatalogFallback({required bool keepHomepageRows}) async {
+  void _applyHomepage(Map<String, dynamic> response) {
+    final payload = _payload(response);
+
+    banners.assignAll(_parseHomepageItems(payload['banners']));
+    categories.assignAll(_parseCategories(payload['categories']));
+    sections.assignAll(_parseSections(payload['rows']));
+
+    final homepageProducts = sections.expand((section) => section.products).toList();
+    products.assignAll(_uniqueProducts(homepageProducts));
+  }
+
+  Future<void> _loadCatalogFallback({required bool keepHomepageRows, required bool fresh}) async {
     try {
-      final categoryResponse = await _api.categories();
-      final productResponse = await _api.products(audience: 'customer');
+      final categoryResponse = await _api.categories(fresh: fresh);
+      final productResponse = await _api.products(audience: 'customer', fresh: fresh);
       if (categories.isEmpty) categories.assignAll(_parseCategories(_payload(categoryResponse)['categories'] ?? categoryResponse));
       if (products.isEmpty) products.assignAll(_parseProducts(_payload(productResponse)['products'] ?? productResponse));
       if (!keepHomepageRows) sections.clear();

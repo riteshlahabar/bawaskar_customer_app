@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/data/models/homepage_model.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/widgets/product_image.dart';
 import '../../../../app/widgets/section_header.dart';
+import 'bank_offer_card.dart';
+import '../../../../app/localization/t.dart';
 
-/// "Bank & Wallet Offers" style coupon row shown for homepage sections
-/// of type `coupon_section`.
+/// "Bank & Wallet Offers" section (`coupon_section`): a fixed two-column grid
+/// of offer cards, matching the two-column layout on the website.
 class CouponSection extends StatelessWidget {
   const CouponSection({required this.section, super.key});
 
@@ -14,103 +14,33 @@ class CouponSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final items = section.items;
+    final hasCoupon = items.any((item) => item.couponCode.trim().isNotEmpty);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
-          title: section.title.isEmpty
-              ? 'Bank & Wallet Offers'
-              : section.title,
+          title: section.title.trim().isEmpty ? t('catalog.bank_offers') : section.title,
         ),
-        SizedBox(
-          height: 118,
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            scrollDirection: Axis.horizontal,
-            itemCount: section.items.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (_, index) =>
-                SizedBox(width: 250, child: _couponCard(section.items[index])),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          itemCount: items.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            // Same height for every card; taller when a coupon footer exists.
+            mainAxisExtent: hasCoupon ? 206 : 168,
+          ),
+          itemBuilder: (_, index) => BankOfferCard(
+            item: items[index],
+            fallbackTitle: section.title,
           ),
         ),
       ],
-    );
-  }
-
-  Widget _couponCard(HomepageItemModel item) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 92,
-            height: double.infinity,
-            child: ProductImage(imageUrl: item.bestImageUrl, fit: BoxFit.cover),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  if (item.subtitle.isNotEmpty)
-                    Text(
-                      item.subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  if (item.description.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 3),
-                      child: Text(
-                        item.description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 10.5,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  if (item.couponCode.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: Text(
-                        'Code: ${item.couponCode}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

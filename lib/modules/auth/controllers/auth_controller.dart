@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../app/data/services/auth_storage.dart';
 import '../../../app/data/services/customer_api_service.dart';
 import '../../../app/routes/app_routes.dart';
+import '../../../app/localization/t.dart';
 
 class AuthController extends GetxController {
   AuthController(this._api, this._storage);
@@ -16,8 +17,7 @@ class AuthController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final nameController = TextEditingController();
-  final otpController =
-    TextEditingController();
+  final otpController = TextEditingController();
 
   final signupName = TextEditingController();
   final signupMobile = TextEditingController();
@@ -31,7 +31,7 @@ class AuthController extends GetxController {
   Future<void> requestOtp() async {
     final enteredMobile = mobileController.text.trim();
     if (enteredMobile.length < 10) {
-      Get.snackbar('Mobile Required', 'Enter valid mobile number.');
+      Get.snackbar(t('auth.mobile_required'), t('auth.enter_valid_mobile'));
       return;
     }
     isLoading.value = true;
@@ -41,7 +41,7 @@ class AuthController extends GetxController {
       nameForOtp.value = nameController.text.trim();
       Get.toNamed(AppRoutes.otp);
     } catch (error) {
-      Get.snackbar('OTP Failed', error.toString());
+      Get.snackbar(t('auth.otp_failed'), error.toString());
     } finally {
       isLoading.value = false;
     }
@@ -49,7 +49,7 @@ class AuthController extends GetxController {
 
   Future<void> verifyOtp() async {
     if (otpController.text.trim().length != 6) {
-      Get.snackbar('OTP Required', 'Enter 6 digit OTP.');
+      Get.snackbar(t('auth.otp_required'), t('auth.enter_otp'));
       return;
     }
     isLoading.value = true;
@@ -62,7 +62,7 @@ class AuthController extends GetxController {
       await _saveFromResponse(response, fallbackMobile: mobile.value);
       Get.offAllNamed(AppRoutes.main);
     } catch (error) {
-      Get.snackbar('Login Failed', error.toString());
+      Get.snackbar(t('auth.login_failed'), error.toString());
     } finally {
       isLoading.value = false;
     }
@@ -72,11 +72,11 @@ class AuthController extends GetxController {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     if (!GetUtils.isEmail(email)) {
-      Get.snackbar('Email Required', 'Enter a valid email address.');
+      Get.snackbar(t('auth.email_required'), t('auth.enter_valid_email'));
       return;
     }
     if (password.length < 6) {
-      Get.snackbar('Password Required', 'Password must be at least 6 characters.');
+      Get.snackbar(t('auth.password_required'), t('auth.password_min'));
       return;
     }
     isLoading.value = true;
@@ -86,7 +86,7 @@ class AuthController extends GetxController {
       Get.offAllNamed(AppRoutes.main);
    } catch (error) {
   Get.snackbar(
-    'Login Failed',
+    t('auth.login_failed'),
     error.toString(),
   );
 }finally {
@@ -94,20 +94,20 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> signup() async {
+  Future<void> signup({Map<String, dynamic> location = const {}}) async {
     final name = signupName.text.trim();
     final mobileNo = signupMobile.text.trim();
     final email = signupEmail.text.trim();
     if (name.length < 3) {
-      Get.snackbar('Name Required', 'Enter customer full name.');
+      Get.snackbar(t('auth.name_required'), t('auth.enter_full_name'));
       return;
     }
     if (mobileNo.length < 10) {
-      Get.snackbar('Mobile Required', 'Enter valid mobile number.');
+      Get.snackbar(t('auth.mobile_required'), t('auth.enter_valid_mobile'));
       return;
     }
     if (email.isNotEmpty && !GetUtils.isEmail(email)) {
-      Get.snackbar('Invalid Email', 'Enter valid email address or leave it blank.');
+      Get.snackbar(t('auth.invalid_email'), t('auth.email_or_blank'));
       return;
     }
     isLoading.value = true;
@@ -117,13 +117,14 @@ class AuthController extends GetxController {
         mobile: mobileNo,
         email: email,
         password: signupPassword.text.trim(),
+        location: location,
       );
       mobileController.text = mobileNo;
       nameController.text = name;
       await requestOtp();
     } catch (error) {
   Get.snackbar(
-    'Signup Failed',
+    t('auth.signup_failed'),
     error.toString(),
   );
 } finally {
@@ -140,8 +141,8 @@ class AuthController extends GetxController {
       response['data'] ?? response;
 
   if (rawData is! Map) {
-    throw const FormatException(
-      'Invalid login response from server.',
+    throw FormatException(
+      t('auth.invalid_response'),
     );
   }
 
@@ -156,8 +157,8 @@ class AuthController extends GetxController {
       '';
 
   if (token.isEmpty) {
-    throw const FormatException(
-      'Login token missing from server response.',
+    throw FormatException(
+      t('auth.token_missing'),
     );
   }
 
@@ -173,7 +174,7 @@ class AuthController extends GetxController {
         user['name']?.toString() ??
         (nameForOtp.value.isNotEmpty
             ? nameForOtp.value
-            : 'Customer'),
+            : t('common.customer')),
     mobile:
         user['mobile']?.toString() ??
         fallbackMobile,

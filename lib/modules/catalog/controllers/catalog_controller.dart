@@ -3,15 +3,17 @@ import 'package:get/get.dart';
 import '../../../app/data/mock/mock_catalog.dart';
 import '../../../app/data/models/category_model.dart';
 import '../../../app/data/models/product_model.dart';
-import '../../../app/data/services/customer_api_service.dart';
-import 'catalog_response_parser.dart';
+import '../services/catalog_repository.dart';
+import '../../../app/localization/t.dart';
 
 class CatalogController extends GetxController {
-  CatalogController(this._api);
+  CatalogController(this._catalog);
 
-  final CustomerApiService _api;
+  final CatalogRepository _catalog;
 
   final isLoading = false.obs;
+  final isLoadingMore = false.obs;
+  final hasMore = false.obs;
 
   final categories = <CategoryModel>[].obs;
   final products = <ProductModel>[].obs;
@@ -19,13 +21,24 @@ class CatalogController extends GetxController {
   final selectedCategoryId = 0.obs;
   final search = ''.obs;
 
+  int _page = 1;
+
+  // Bumped on every first-page load, so a slow response for a previous
+  // category or search can never overwrite the current one.
+  int _requestId = 0;
+
+  // The search term the current product list was loaded for.
+  String _activeQuery = '';
+
   List<ProductModel> get filteredProducts {
     final term = search.value.trim().toLowerCase();
 
-    if (term.isEmpty) {
+    // Already filtered by the server, or nothing typed.
+    if (term.isEmpty || term == _activeQuery.toLowerCase()) {
       return products;
     }
 
+    // Instant local filter while the debounced server search is pending.
     return products.where((product) {
       return product.name.toLowerCase().contains(term) ||
           product.categoryName.toLowerCase().contains(term) ||
@@ -34,126 +47,133 @@ class CatalogController extends GetxController {
   }
 
   @override
+  void onInit() {
+    super.onInit();
+
+    debounce<String>(search, (value) {
+      if (value.trim() != _activeQuery) _loadFirstPage();
+    }, time: const Duration(milliseconds: 400));
+  }
+
+  @override
   void onReady() {
     super.onReady();
-    loadCatalog();
+
+    _loadCategories();
+
+    // Home may already have started a load through selectCategory().
+    if (_requestId == 0) _loadFirstPage();
   }
 
-  Future<void> loadCatalog() async {
-    isLoading.value = true;
-
-    try {
-      await _loadCategories();
-
-      await _loadProductsForSelectedCategory();
-    } catch (_) {
-      await _loadFallback();
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> _loadCategories() async {
-    // Home API is already showing the correct category images.
-    // Use the same category source first so Home and Category
-    // tab cannot show different category images.
-    try {
-      final homepageResponse = await _api.homepage();
-
-      final homepageCategories =
-          CatalogResponseParser.categories(homepageResponse);
-
-      if (homepageCategories.isNotEmpty) {
-        categories.assignAll(homepageCategories);
-        return;
-      }
-    } catch (_) {
-      // Fall through to normal categories API.
-    }
-
-    final categoryResponse = await _api.categories();
-
-    final categoryList =
-        CatalogResponseParser.categories(categoryResponse);
-
-    if (categoryList.isNotEmpty) {
-      categories.assignAll(categoryList);
-    } else {
-      categories.assignAll(MockCatalog.categories);
-    }
+  /// Pull-to-refresh: reloads categories and the first page from the server,
+  /// skipping the saved copy and the server cache.
+  Future<void> loadCatalog({bool fresh = true}) async {
+    await Future.wait([
+      _loadCategories(fresh: fresh),
+      _loadFirstPage(fresh: fresh),
+    ]);
   }
 
   Future<void> selectCategory(int id) async {
-    if (selectedCategoryId.value == id &&
-        products.isNotEmpty) {
-      return;
-    }
+    if (selectedCategoryId.value == id && products.isNotEmpty) return;
 
     selectedCategoryId.value = id;
     search.value = '';
 
-    isLoading.value = true;
-
-    try {
-      await _loadProductsForSelectedCategory();
-    } catch (error) {
-      products.clear();
-
-      Get.snackbar(
-        'Products',
-        error.toString(),
-      );
-    } finally {
-      isLoading.value = false;
-    }
+    await _loadFirstPage();
   }
 
-  Future<void> _loadProductsForSelectedCategory() async {
-    final selectedId = selectedCategoryId.value;
+  /// Next page, triggered when the grid is scrolled near the bottom.
+  Future<void> loadMore() async {
+    if (isLoading.value || isLoadingMore.value || !hasMore.value) return;
 
-    final response = await _api.products(
-      audience: 'customer',
-      categoryId: selectedId == 0
-          ? null
-          : selectedId,
-      perPage: 100,
-    );
+    final requestId = _requestId;
+    final nextPage = _page + 1;
 
-    final loadedProducts = CatalogResponseParser.products(response);
+    isLoadingMore.value = true;
 
-    products.assignAll(loadedProducts);
-
-    // Only use local sample products when "All" itself
-    // could not return anything.
-    if (products.isEmpty && selectedId == 0) {
-      products.assignAll(MockCatalog.products);
-    }
-  }
-
-  Future<void> _loadFallback() async {
     try {
-      final categoryResponse = await _api.categories();
-
-      final loadedCategories =
-          CatalogResponseParser.categories(categoryResponse);
-
-      categories.assignAll(
-        loadedCategories.isNotEmpty
-            ? loadedCategories
-            : MockCatalog.categories,
+      final result = await _catalog.fetchPage(
+        categoryId: selectedCategoryId.value,
+        query: _activeQuery,
+        page: nextPage,
       );
+
+      if (requestId != _requestId) return;
+
+      products.addAll(result.products);
+      _page = nextPage;
+      hasMore.value = result.hasMore;
     } catch (_) {
+      // Keep what is loaded; scrolling again retries.
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
+  Future<void> _loadCategories({bool fresh = false}) async {
+    if (!fresh && categories.isEmpty) {
+      final saved = await _catalog.savedCategories();
+
+      if (saved.isNotEmpty && categories.isEmpty) categories.assignAll(saved);
+    }
+
+    final loaded = await _catalog.loadCategories(fresh: fresh);
+
+    if (loaded.isNotEmpty) {
+      categories.assignAll(loaded);
+    } else if (categories.isEmpty) {
       categories.assignAll(MockCatalog.categories);
     }
+  }
+
+  Future<void> _loadFirstPage({bool fresh = false}) async {
+    final requestId = ++_requestId;
+    final query = search.value.trim();
+    final categoryId = selectedCategoryId.value;
+
+    _activeQuery = query;
+    _page = 1;
+    hasMore.value = false;
+    isLoading.value = true;
+
+    // On refresh the list on screen already belongs to this category.
+    var showingCurrent = fresh;
+
+    if (!fresh && query.isEmpty) {
+      final saved = await _catalog.savedFirstPage(categoryId);
+
+      if (requestId != _requestId) return;
+
+      if (saved != null) {
+        products.assignAll(saved);
+        showingCurrent = true;
+      }
+    }
 
     try {
-      await _loadProductsForSelectedCategory();
-    } catch (_) {
-      if (selectedCategoryId.value == 0) {
+      final result = await _catalog.fetchPage(categoryId: categoryId, query: query, page: 1, fresh: fresh);
+
+      if (requestId != _requestId) return;
+
+      products.assignAll(result.products);
+      hasMore.value = result.hasMore;
+
+      // Only use local sample products when "All" itself returned nothing.
+      if (products.isEmpty && categoryId == 0 && query.isEmpty) {
+        products.assignAll(MockCatalog.products);
+      }
+    } catch (error) {
+      if (requestId != _requestId || showingCurrent) return;
+
+      if (categoryId == 0 && query.isEmpty) {
         products.assignAll(MockCatalog.products);
       } else {
         products.clear();
+        Get.snackbar(t('common.products'), error.toString());
       }
+    } finally {
+      if (requestId == _requestId) isLoading.value = false;
     }
   }
 }

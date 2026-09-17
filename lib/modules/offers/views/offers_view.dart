@@ -6,6 +6,7 @@ import '../../../app/widgets/app_card.dart';
 import '../../../app/widgets/empty_state.dart';
 import '../../../app/widgets/loading_view.dart';
 import '../controllers/offers_controller.dart';
+import '../../../app/localization/t.dart';
 
 class OffersView extends GetView<OffersController> {
   const OffersView({super.key});
@@ -13,15 +14,15 @@ class OffersView extends GetView<OffersController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Offers & Coupons')),
+      appBar: AppBar(title: Text(t('menu.offers'))),
       body: Obx(() {
         if (controller.isLoading.value && controller.offers.isEmpty) {
-          return const LoadingView(message: 'Loading offers...');
+          return LoadingView(message: t('offers.loading'));
         }
         if (controller.isEmpty) {
-          return const EmptyState(
-            title: 'No offers right now',
-            message: 'Check back soon for coupons and seasonal promotions.',
+          return EmptyState(
+            title: t('offers.empty_title'),
+            message: t('offers.empty_message'),
             icon: Icons.local_offer_outlined,
           );
         }
@@ -61,9 +62,9 @@ class OffersView extends GetView<OffersController> {
                         TextButton(
                           onPressed: () {
                             controller.useCode(offer.code);
-                            Get.snackbar('Coupon', '${offer.code} copied to the coupon box.');
+                            Get.snackbar(t('offers.coupon'), t('offers.code_copied', {'code': offer.code}));
                           },
-                          child: const Text('Use'),
+                          child: Text(t('common.use')),
                         ),
                       ],
                     ),
@@ -96,7 +97,7 @@ class OffersView extends GetView<OffersController> {
                         const Spacer(),
                         if (offer.minOrderValue > 0)
                           Text(
-                            'Min ₹${offer.minOrderValue.toStringAsFixed(0)}',
+                            t('offers.min_order', {'amount': '₹${offer.minOrderValue.toStringAsFixed(0)}'}),
                             style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 11.5,

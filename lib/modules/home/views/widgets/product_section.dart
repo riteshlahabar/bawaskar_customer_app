@@ -6,6 +6,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/product_card.dart';
 import '../../../../app/widgets/section_header.dart';
 import '../../../main_shell/controllers/main_shell_controller.dart';
+import '../../../../app/localization/t.dart';
 
 /// Horizontal row of products under a titled section header, used for
 /// homepage product sections and the fallback featured/top-selling/new
@@ -29,7 +30,7 @@ class ProductSection extends StatelessWidget {
       children: [
         SectionHeader(
           title: title,
-          actionText: 'See All',
+          actionText: t('common.see_all'),
           onAction: () => Get.find<MainShellController>().changeTab(1),
         ),
         if (subtitle.isNotEmpty)

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/data/models/homepage_model.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/section_header.dart';
+import '../../../../app/localization/t.dart';
 
 /// Grid of store-service badges ("Verified", etc.) for homepage sections
 /// of type `service_section`.
@@ -18,7 +19,7 @@ class ServiceSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(
-          title: section.title.isEmpty ? 'Store Services' : section.title,
+          title: section.title.isEmpty ? t('catalog.store_services') : section.title,
         ),
         GridView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),

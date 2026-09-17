@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../app/data/cache/json_cache_store.dart';
 import '../../../app/data/services/api_client.dart';
 import '../../../app/data/services/cart_service.dart';
 import '../../../app/data/services/review_api_service.dart';
@@ -10,7 +11,7 @@ class ProductDetailBinding extends Bindings {
   @override
   void dependencies() {
     if (!Get.isRegistered<CartService>()) {
-      Get.put<CartService>(CartService(), permanent: true);
+      Get.put<CartService>(CartService(Get.find<JsonCacheStore>()), permanent: true);
     }
 
     Get.lazyPut<ProductDetailController>(
