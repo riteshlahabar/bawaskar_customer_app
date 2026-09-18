@@ -8,6 +8,7 @@ import '../../../app/data/models/category_model.dart';
 import '../../../app/data/models/homepage_model.dart';
 import '../../../app/data/models/product_model.dart';
 import '../../../app/data/services/customer_api_service.dart';
+import '../../../app/localization/localized_cache_key.dart';
 
 class HomeController extends GetxController {
   HomeController(this._api, this._cache);
@@ -53,13 +54,13 @@ class HomeController extends GetxController {
     isLoading.value = true;
     try {
       if (!fresh && sections.isEmpty && products.isEmpty) {
-        final cached = await _cache.read(homepageCacheKey);
+        final cached = await _cache.read(localizedCacheKey(homepageCacheKey));
         if (cached != null) _applyHomepage(cached);
       }
 
       final homepageResponse = await _api.homepage();
       _applyHomepage(homepageResponse);
-      unawaited(_cache.write(homepageCacheKey, homepageResponse));
+      unawaited(_cache.write(localizedCacheKey(homepageCacheKey), homepageResponse));
 
       if (categories.isEmpty || products.isEmpty) {
         await _loadCatalogFallback(keepHomepageRows: true, fresh: fresh);

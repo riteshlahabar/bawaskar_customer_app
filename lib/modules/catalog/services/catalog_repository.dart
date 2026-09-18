@@ -4,6 +4,7 @@ import '../../../app/data/cache/json_cache_store.dart';
 import '../../../app/data/models/category_model.dart';
 import '../../../app/data/models/product_model.dart';
 import '../../../app/data/services/customer_api_service.dart';
+import '../../../app/localization/localized_cache_key.dart';
 import '../../home/controllers/home_controller.dart';
 import '../controllers/catalog_response_parser.dart';
 
@@ -27,7 +28,7 @@ class CatalogRepository {
 
   /// Categories saved with the homepage, or empty.
   Future<List<CategoryModel>> savedCategories() async {
-    final cached = await _cache.read(HomeController.homepageCacheKey);
+    final cached = await _cache.read(localizedCacheKey(HomeController.homepageCacheKey));
 
     return cached == null ? const [] : CatalogResponseParser.categories(cached);
   }
@@ -40,7 +41,7 @@ class CatalogRepository {
       final list = CatalogResponseParser.categories(response);
 
       if (list.isNotEmpty) {
-        unawaited(_cache.write(HomeController.homepageCacheKey, response));
+        unawaited(_cache.write(localizedCacheKey(HomeController.homepageCacheKey), response));
         return list;
       }
     } catch (_) {
@@ -87,5 +88,6 @@ class CatalogRepository {
     );
   }
 
-  String _productsKey(int categoryId) => 'customer_catalog_products_$categoryId';
+  String _productsKey(int categoryId) =>
+      localizedCacheKey('customer_catalog_products_$categoryId');
 }
