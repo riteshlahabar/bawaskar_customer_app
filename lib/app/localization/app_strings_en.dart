@@ -67,6 +67,7 @@ const Map<String, String> kAppStringsEn = <String, String>{
   'auth.otp_primary_note': 'Mobile OTP is currently the primary backend login method.',
   'auth.otp_required': 'OTP Required',
   'auth.otp_sent_to': 'Enter OTP sent to {mobile}',
+  'auth.otp_subtitle': 'We will send a 6 digit OTP to your mobile number.',
   'auth.otp_verification': 'OTP Verification',
   'auth.password': 'Password',
   'auth.password_min': 'Password must be at least 6 characters.',
