@@ -98,25 +98,50 @@ class ProductDetailView extends GetView<ProductDetailController> {
                     height: 48,
                     decoration: BoxDecoration(border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(14)),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(onPressed: controller.decrease, icon: const Icon(Icons.remove)),
+                        IconButton(
+                          onPressed: controller.decrease,
+                          icon: const Icon(Icons.remove, size: 18),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                          visualDensity: VisualDensity.compact,
+                        ),
                         Text(controller.quantity.value.toString(), style: const TextStyle(fontWeight: FontWeight.w800)),
-                        IconButton(onPressed: controller.increase, icon: const Icon(Icons.add)),
+                        IconButton(
+                          onPressed: controller.increase,
+                          icon: const Icon(Icons.add, size: 18),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+                          visualDensity: VisualDensity.compact,
+                        ),
                       ],
                     ),
                   )),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: OutlinedButton(
                   onPressed: controller.addToCart,
-                  child: Text(t('catalog.add_to_cart')),
+                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                  child: Text(
+                    t('catalog.add_to_cart'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13),
+                  ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton(
                   onPressed: controller.buyNow,
-                  child: Text(t('catalog.buy_now')),
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                  child: Text(
+                    t('catalog.buy_now'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13),
+                  ),
                 ),
               ),
             ],

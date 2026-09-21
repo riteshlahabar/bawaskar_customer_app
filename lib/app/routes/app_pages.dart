@@ -34,7 +34,9 @@ import '../../modules/product_detail/bindings/product_detail_binding.dart';
 import '../../modules/product_detail/views/product_detail_view.dart';
 import '../../modules/returns/bindings/returns_binding.dart';
 import '../../modules/returns/views/returns_view.dart';
+import '../../modules/reviews/bindings/my_reviews_binding.dart';
 import '../../modules/reviews/bindings/write_review_binding.dart';
+import '../../modules/reviews/views/my_reviews_view.dart';
 import '../../modules/reviews/views/write_review_view.dart';
 import '../../modules/splash/bindings/splash_binding.dart';
 import '../../modules/splash/views/splash_view.dart';
@@ -73,5 +75,6 @@ class AppPages {
     GetPage(name: AppRoutes.changePassword, page: () => const MenuShell(route: AppRoutes.changePassword, child: ChangePasswordView()), binding: ChangePasswordBinding()),
     GetPage(name: AppRoutes.language, page: () => const MenuShell(route: AppRoutes.language, child: LanguageView()), binding: LanguageBinding()),
     GetPage(name: AppRoutes.writeReview, page: () => const WriteReviewView(), binding: WriteReviewBinding()),
+    GetPage(name: AppRoutes.myReviews, page: () => const MenuShell(route: AppRoutes.myReviews, child: MyReviewsView()), binding: MyReviewsBinding()),
   ];
 }

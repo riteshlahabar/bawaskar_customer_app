@@ -23,6 +23,7 @@ class AccountChipBar extends StatelessWidget {
     (label: 'menu.offers', route: AppRoutes.offers),
     (label: 'menu.invoices', route: AppRoutes.invoices),
     (label: 'menu.returns', route: AppRoutes.returns),
+    (label: 'menu.my_reviews', route: AppRoutes.myReviews),
     (label: 'menu.notifications', route: AppRoutes.notifications),
     (label: 'menu.addresses', route: AppRoutes.addresses),
     (label: 'menu.support', route: AppRoutes.support),

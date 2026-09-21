@@ -81,7 +81,7 @@ class ProductModel {
       shortDescription: json['short_description']?.toString() ?? '',
       categoryId: _asInt(json['category_id']),
       categoryName: _categoryName(json),
-      unit: _unitName(json),
+      unit: _unitName(json, variant),
       imageUrl: _image(json),
       homepageImageUrl: _cleanImage(json['homepage_image_url']),
       homepageMobileImageUrl: _cleanImage(json['homepage_mobile_image_url']),
@@ -161,12 +161,22 @@ class ProductModel {
     return json['category_name']?.toString() ?? category?.toString() ?? '';
   }
 
-  static String _unitName(Map<String, dynamic> json) {
+  /// A variant carries the actual pack size ("1 KG", "500 G"); the product's
+  /// own unit is only the measure ("Kilogram") with no quantity, so it is the
+  /// last resort — and even then shown as "1" plus the short name rather than
+  /// the bare, unhelpful full name.
+  static String _unitName(Map<String, dynamic> json, Map<String, dynamic>? variant) {
+    final variantName = variant?['name']?.toString().trim() ?? '';
+    if (variantName.isNotEmpty) return variantName;
+
     final unit = json['unit'];
-    if (unit is Map) {
-      return unit['name']?.toString() ?? unit['short_name']?.toString() ?? '';
-    }
-    return json['unit_name']?.toString() ?? unit?.toString() ?? '';
+    final short = (unit is Map ? unit['short_name']?.toString() : json['unit_short_name']?.toString())?.trim() ?? '';
+    if (short.isNotEmpty) return '1 $short';
+
+    // No variant and no short name on the Unit master — still never show a
+    // bare, quantity-less unit; "1 Kilogram" beats "Kilogram" alone.
+    final full = (unit is Map ? (unit['name']?.toString() ?? unit['short_name']?.toString()) : (json['unit_name']?.toString() ?? unit?.toString()))?.trim() ?? '';
+    return full.isEmpty ? '' : '1 $full';
   }
 
   static double _firstPrice(Map<String, dynamic> json, List<String> keys) {

@@ -40,10 +40,13 @@ class QtyStepper extends StatelessWidget {
   }
 
   Widget _button(IconData icon, VoidCallback onTap, {required Color color}) {
-    return InkWell(
-      onTap: onTap,
-      customBorder: const CircleBorder(),
-      child: SizedBox(width: 36, height: 36, child: Icon(icon, size: 18, color: color)),
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: SizedBox(width: 36, height: 36, child: Icon(icon, size: 18, color: color)),
+      ),
     );
   }
 }

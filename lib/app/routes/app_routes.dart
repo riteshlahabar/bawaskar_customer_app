@@ -25,4 +25,5 @@ class AppRoutes {
   static const invoiceDetail = '/invoices/detail';
   static const returns = '/returns';
   static const writeReview = '/write-review';
+  static const myReviews = '/my-reviews';
 }

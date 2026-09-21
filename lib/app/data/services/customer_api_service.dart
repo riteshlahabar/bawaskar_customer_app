@@ -164,6 +164,10 @@ class CustomerApiService {
   );
 }
 
+  Future<Map<String, dynamic>> cancelOrder(int orderId, String reason) {
+    return _client.postJson(ApiConfig.customerOrderCancel(orderId), {'reason': reason.trim()});
+  }
+
   Future<Map<String, dynamic>> saveAddress(Map<String, dynamic> data) =>
       _client.postJson(ApiConfig.customerAddresses, data);
 

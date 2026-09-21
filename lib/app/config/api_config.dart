@@ -50,6 +50,7 @@ class ApiConfig {
   static const String changePassword = '/customer/change-password';
 
   static String customerOrder(int id) => '/customer/orders/$id';
+  static String customerOrderCancel(int id) => '/customer/orders/$id/cancel';
   static String customerAddress(int id) => '/customer/addresses/$id';
 
   // --- Wishlist -------------------------------------------------------------
