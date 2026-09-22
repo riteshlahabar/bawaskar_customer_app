@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../app/data/services/cart_service.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/widgets/product_image.dart';
 import '../../../app/widgets/wishlist_button.dart';
@@ -15,6 +16,7 @@ class ProductDetailView extends GetView<ProductDetailController> {
   @override
   Widget build(BuildContext context) {
     final product = controller.product;
+    final cart = Get.find<CartService>();
 
     // Fired once the first frame is scheduled so the network call never blocks
     // the product page from painting.
@@ -27,7 +29,15 @@ class ProductDetailView extends GetView<ProductDetailController> {
         title: Text(t('catalog.product_details')),
         actions: [
           WishlistButton(productId: controller.product.id, size: 22, unsavedColor: Colors.white),
-          IconButton(onPressed: controller.openCart, icon: const Icon(Icons.shopping_cart_outlined)),
+          IconButton(
+            onPressed: controller.openCart,
+            icon: Obx(() => Badge(
+                  isLabelVisible: cart.totalItems > 0,
+                  label: Text(cart.totalItems.toString()),
+                  backgroundColor: AppColors.orange,
+                  child: const Icon(Icons.shopping_cart_outlined),
+                )),
+          ),
         ],
       ),
       body: ListView(

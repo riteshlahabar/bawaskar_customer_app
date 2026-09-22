@@ -309,7 +309,7 @@ const Map<String, String> kAppStringsEn = <String, String>{
   'orders.cancellation_reason': 'Reason for cancelling',
   'orders.cancelled': 'Cancelled',
   'orders.confirmed': 'Order confirmed',
-  'orders.current': 'Current Orders',
+  'orders.current': 'Order Details',
   'orders.delivered': 'Delivered',
   'orders.delivered_on': 'Delivered {date}',
   'orders.details': 'Details',
@@ -431,6 +431,7 @@ const Map<String, String> kAppStringsEn = <String, String>{
   'tracking.code': 'Tracking Code',
   'tracking.courier': 'Courier',
   'tracking.deliver_to': 'Deliver To',
+  'tracking.details_title': 'Order Details',
   'tracking.destination': 'Destination',
   'tracking.from': 'From',
   'tracking.items_count': 'Items ({n})',
@@ -452,7 +453,9 @@ const Map<String, String> kAppStringsEn = <String, String>{
   'tracking.review_desk': 'Order review desk',
   'tracking.tap_copy': 'Tap to copy tracking link',
   'tracking.title': 'Track Order',
+  'tracking.track_order': 'Track Order',
   'tracking.unavailable': 'Cannot track this order',
+  'tracking.view_details': 'Order Details',
   'tracking.with_partner': 'With delivery partner, on the way to you',
 
   // --- wishlist ----------------------------------------------------------------
