@@ -16,8 +16,9 @@ class LoginView extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return AuthScaffold(
-      title: t('auth.welcome_back'),
-      subtitle: t('auth.customer_login_subtitle'),
+      title: '',
+      subtitle: '',
+      showBranding: false,
       footer: AuthFooter(
         prompt: t('auth.new_customer'),
         action: t('auth.create_account'),
@@ -35,7 +36,6 @@ class LoginView extends GetView<AuthController> {
             () => controller.loginMode.value == 0
                 ? MobileLoginForm(
                     mobileController: controller.mobileController,
-                    nameController: controller.nameController,
                     isLoading: controller.isLoading,
                     onSubmit: controller.requestOtp,
                   )

@@ -35,7 +35,7 @@ const Map<String, String> kAppStringsEn = <String, String>{
   'auth.brand_tagline': 'Healthy farms, trusted products',
   'auth.checking': 'Checking...',
   'auth.confirm_new_password': 'Confirm New Password',
-  'auth.create_account': 'Create account',
+  'auth.create_account': 'Register',
   'auth.create_account_title': 'Create Account',
   'auth.create_verify': 'Create & Verify OTP',
   'auth.creating': 'Creating...',

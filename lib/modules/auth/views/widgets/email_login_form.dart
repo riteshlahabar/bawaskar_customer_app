@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../app/localization/t.dart';
-import '../../../../app/theme/app_colors.dart';
 import 'auth_submit_button.dart';
 import 'password_field.dart';
 
@@ -45,12 +44,6 @@ class EmailLoginForm extends StatelessWidget {
             isLoading: isLoading.value,
             onPressed: onSubmit,
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          t('auth.otp_primary_note'),
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5, height: 1.4),
         ),
       ],
     );

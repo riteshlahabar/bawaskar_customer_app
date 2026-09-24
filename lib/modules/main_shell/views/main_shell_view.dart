@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../app/data/services/auth_storage.dart';
@@ -40,7 +41,7 @@ class MainShellView extends GetView<MainShellController> {
     ];
     final auth = Get.find<AuthStorage>();
 
-    return Obx(() => Scaffold(
+    final shell = Obx(() => Scaffold(
           appBar: AppBar(
             title: Text(
               controller.currentTitle,
@@ -86,6 +87,21 @@ class MainShellView extends GetView<MainShellController> {
             onSelected: controller.changeTab,
           ),
         ));
+
+    // Back steps through the tabs in the order they were opened; the app only
+    // closes once there is no earlier tab left. Screens pushed above the shell
+    // (product detail, order details, the menu screens) pop on their own first.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+
+        if (!controller.goBackTab()) {
+          SystemNavigator.pop();
+        }
+      },
+      child: shell,
+    );
   }
 }
 
